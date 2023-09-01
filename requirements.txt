@@ -1,3 +1,6 @@
 fastapi[all]~=0.103.0
 
 pydantic~=2.3.0
+
+numpy
+
