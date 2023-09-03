@@ -23,5 +23,9 @@ class Qubit:
     def set_beta(self, beta):
         self.BETA = beta
 
+    def set_state_vector(self, state_vector):
+        self.ALPHA = state_vector[0][0]
+        self.BETA = state_vector[0][1]
+
     def print_state(self):
         print(f"{self.ALPHA}|0> + {self.BETA}|1>")

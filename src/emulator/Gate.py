@@ -7,9 +7,6 @@ class Gate():
         
     def get_ctrl(self):
         return self.ctrl
-    
-    def get_type(self):
-        return self.type
         
     def X(self):
         return np.array([[0, 1], [1, 0]])
@@ -22,3 +19,14 @@ class Gate():
     
     def H(self):
         return np.array([[1, 1], [1, -1]]) * 1 / np.sqrt(2)
+    
+    def get_gate_matrix(self):
+        match self.type:
+            case "X":
+                return self.X()
+            case "Y":
+                return self.Y()
+            case "Z":
+                return self.Z()
+            case _:
+                return self.H()
