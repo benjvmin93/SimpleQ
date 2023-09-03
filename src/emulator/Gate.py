@@ -7,6 +7,9 @@ class Gate():
         
     def get_ctrl(self):
         return self.ctrl
+    
+    def get_type(self):
+        return self.type
         
     def X(self):
         return np.array([[0, 1], [1, 0]])
@@ -28,5 +31,7 @@ class Gate():
                 return self.Y()
             case "Z":
                 return self.Z()
-            case _:
+            case "H":
                 return self.H()
+            case _:
+                raise f"invalid gate type {self.type}"

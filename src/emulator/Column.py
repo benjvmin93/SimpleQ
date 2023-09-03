@@ -8,7 +8,12 @@ class Column:
         self.gate = Gate(type, ctlr)
     
     def get_gate(self):
-        return self.gate.get_gate_matrix()
+        return self.gate
+    
+    
+    
+    def get_index(self):
+        return self.index
     
     def apply_column(self, quantum_register):
         qubit = quantum_register[self.index]
@@ -19,6 +24,6 @@ class Column:
                 control_qubit = quantum_register[control]
                 if control_qubit.get_beta() != 1:
                     return
-        qubit.set_state_vector(qubit_state_vector @ self.get_gate())
+        qubit.set_state_vector(qubit_state_vector @ self.gate.get_gate_matrix())
         
         

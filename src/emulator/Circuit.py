@@ -13,26 +13,11 @@ class Circuit:
     def get_classical_register(self):
         return self.classical_register
     
-    def X(self, index, ctrl=None):
-        column = Column(index, "X", ctrl)
-        self.circuit.append(column)
-        return self
-    
-    def Y(self, index, ctrl=None):
-        column = Column(index, "Y", ctrl)
-        self.circuit.append(column)
-        return self
-    
-    def Z(self, index, ctrl=None):
-        column = Column(index, "Z", ctrl)
+    def set_gate(self, type, index, ctrl=None):
+        column = Column(index, type, ctrl)
         self.circuit.append(column)
         return self
 
-    def H(self, index, ctrl=None):
-        column = Column(index, "H", ctrl)
-        self.circuit.append(column)
-        return self
-    
     def launch_circuit(self):
         for column in self.circuit:
             column.apply_column(self.quantum_register)
@@ -40,4 +25,12 @@ class Circuit:
     def print_results(self):
         for qubit in self.quantum_register:
             qubit.print_state()
-
+    
+    def print_circuit(self):
+        qubit_str = ["|0>" for _ in range(len(self.quantum_register))]
+        for column in self.circuit:
+            index = column.get_index()
+            gate = column.get_gate()
+            qubit_str[index] += f"--{gate.get_type()}"
+        for q in qubit_str:
+            print(q)
