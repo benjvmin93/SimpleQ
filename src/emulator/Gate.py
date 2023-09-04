@@ -1,6 +1,35 @@
 import numpy as np
 
+"""
+Gate data representation:
+
+    "GATE": {
+        "QUBITS": int,
+        "BLOCKS": {
+            "B1": {
+                "index": int,
+                "type": str,
+                "ctrl": [int]?,
+            }
+            "B2": {
+                ...
+            },
+            ...
+        }
+    }
+"""
+
 class Gate():
+    """
+    Gate class represented by its type and control indexes.
+
+    Attributes
+    ----------
+    type : str
+        gate identifier
+    ctrl : [int]?
+        list of control qubit's indexes
+    """
     def __init__(self, type, ctrl):
         self.type = type
         self.ctrl = ctrl

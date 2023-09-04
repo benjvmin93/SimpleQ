@@ -3,14 +3,33 @@ import numpy as np
 from Gate import Gate
 
 class Column:
+    """
+    A class used to represent one step within the circuit.
+
+    Attributes
+    ----------
+    index : int
+        the qubit on which the gate is applied
+    gate : Gate
+        the quantum gate we are applying at this specific index
+    """
+
     def __init__(self, index, type, ctlr=None):
+        """
+        Parameters
+        ----------
+        index : int
+            qubit index
+        type : str
+            gate identifier
+        ctlr : [int]?
+            control qubit indexes list
+        """
         self.index = index
         self.gate = Gate(type, ctlr)
     
     def get_gate(self):
         return self.gate
-    
-    
     
     def get_index(self):
         return self.index
@@ -25,5 +44,3 @@ class Column:
                 if control_qubit.get_beta() != 1:
                     return
         qubit.set_state_vector(qubit_state_vector @ self.gate.get_gate_matrix())
-        
-        
