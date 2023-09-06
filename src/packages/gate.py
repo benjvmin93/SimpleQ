@@ -50,7 +50,7 @@ class Gate():
         return np.array([[1, 0], [0, -1]])
     
     def H(self):
-        return np.array([[1, 1], [1, -1]]) * 1 / np.sqrt(2)
+        return np.array([[1, 1], [1, -1]]) / np.sqrt(2)
     
     def get_gate_matrix(self):
         match self.type:
@@ -63,4 +63,4 @@ class Gate():
             case "H":
                 return self.H()
             case _:
-                raise f"invalid gate type {self.type}"
+                raise TypeError(f"invalid gate type {self.type}")

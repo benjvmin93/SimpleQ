@@ -1,6 +1,6 @@
 import numpy as np
 
-from Gate import Gate
+from src.packages.gate import Gate
 
 class Column:
     """
@@ -43,4 +43,6 @@ class Column:
                 control_qubit = quantum_register[control]
                 if control_qubit.get_beta() != 1:
                     return
+        print(qubit_state_vector)
         qubit.set_state_vector(qubit_state_vector @ self.gate.get_gate_matrix())
+        print(qubit.get_state_vector())

@@ -1,5 +1,5 @@
-from Column import Column
-from Qubit import Qubit
+from src.packages.column import Column
+from src.packages.qubit import Qubit
 
 """
 Circuit data representation:
