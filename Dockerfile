@@ -1,10 +1,12 @@
+# Dockerfile.alembic for the FastApi server.
+
 FROM python:3.10
 
 ENV PYTHONUNBUFFERED 1
 
 WORKDIR /src
 
-COPY . /src
+COPY .. /src
 
 RUN pip install -r requirements.txt
 
