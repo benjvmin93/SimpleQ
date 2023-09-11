@@ -1,0 +1,44 @@
+version: '3'
+networks:
+  mynetwork:
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres-container
+    env_file: .env   # Don't forget to create a .env file with a POSTGRES_PASSWORD variable containing the password !
+    ports:
+      - "5432:5432"
+    networks:
+      - mynetwork
+
+  fastapi:
+    build:
+      context: .  # Path to your FastAPI app's Dockerfile.alembic and application code
+    container_name: fastapi-container
+    volumes:
+      - .:/src
+    command: ["python", "init_uvicorn.py"]
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    networks:
+      - mynetwork
+
+  alembic:
+    build:
+      context: src/API
+      dockerfile: Dockerfile.alembic
+    container_name: alembic-container
+    env_file: .env
+    environment:
+      ALEMBIC_MODE: upgrade  # init | upgrade | reset | none
+    command: ["./src/API/entrypoint.sh"]
+    volumes:
+      - .:/src/API
+    depends_on:
+      - postgres
+      - fastapi
+    networks:
+      - mynetwork
+
