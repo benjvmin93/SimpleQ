@@ -52,6 +52,12 @@ class Gate:
     def H(self):
         return np.array([[1, 1], [1, -1]]) / np.sqrt(2)
     
+    def SWAP(self):
+        return np.array([[1, 0, 0, 0],
+                         [0, 0, 1, 0],
+                         [0, 1, 0, 0],
+                         [0, 0, 0, 1]])
+    
     def get_gate_matrix(self):
         gate_matrix = None
         match self.type:
@@ -63,6 +69,8 @@ class Gate:
                 gate_matrix = self.Z()
             case "H":
                 gate_matrix = self.H()
+            case "SWAP":
+                gate_matrix = self.SWAP()
             case _:
                 raise TypeError(f"invalid gate type {self.type}")
         return gate_matrix
