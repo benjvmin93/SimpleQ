@@ -30,15 +30,17 @@ class Circuit:
 
     def __init__(self, qubit_amount):
         self.quantum_register = [Qubit() for _ in range(qubit_amount)]
-        self.classical_register = [None for _ in range(qubit_amount)]
         self.circuit = []
-    
+
     def get_quantum_register(self):
         return self.quantum_register
     
-    def get_classical_register(self):
-        return self.classical_register
-    
+    def add_qubit(self, index):
+        self.quantum_register.insert(index, Qubit())
+
+    def delete_qubit(self, index):
+        self.quantum_register.pop(index)
+
     def set_gate(self, type, index, custom_gate=None, ctrl=None):
         """
         Add a gate to the circuit.

@@ -19,7 +19,7 @@ Gate data representation:
     }
 """
 
-class Gate():
+class Gate:
     """
     Gate class represented by its type and control indexes.
 
@@ -53,14 +53,16 @@ class Gate():
         return np.array([[1, 1], [1, -1]]) / np.sqrt(2)
     
     def get_gate_matrix(self):
+        gate_matrix = None
         match self.type:
             case "X":
-                return self.X()
+                gate_matrix = self.X()
             case "Y":
-                return self.Y()
+                gate_matrix = self.Y()
             case "Z":
-                return self.Z()
+                gate_matrix = self.Z()
             case "H":
-                return self.H()
+                gate_matrix = self.H()
             case _:
                 raise TypeError(f"invalid gate type {self.type}")
+        return gate_matrix

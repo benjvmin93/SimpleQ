@@ -1,6 +1,6 @@
 import numpy as np
 
-from src.packages.gate import Gate
+from src.packages.tools import Gate
 
 class Column:
     """
@@ -18,24 +18,24 @@ class Column:
         """
         Parameters
         ----------
-        index : int
+        qubit_index : int
             qubit index
-        type : str
+        gate_type : str
             gate identifier
         ctlr : [int]?
             control qubit indexes list
         """
-        self.index = index
+        self.qubit_index = index
         self.gate = Gate(type, ctlr)
-    
+
     def get_gate(self):
         return self.gate
     
     def get_index(self):
-        return self.index
+        return self.qubit_index
     
     def apply_column(self, quantum_register):
-        qubit = quantum_register[self.index]
+        qubit = quantum_register[self.qubit_index]
         qubit_state_vector = qubit.get_state_vector()
         controls = self.gate.get_ctrl()
         if controls:
