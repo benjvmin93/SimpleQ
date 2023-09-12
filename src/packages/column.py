@@ -1,6 +1,5 @@
-import numpy as np
-
 from src.packages.tools import Gate
+from src.packages.tools import get_gate_by_name
 
 class Column:
     """
@@ -14,19 +13,19 @@ class Column:
         the quantum gate we are applying at this specific index
     """
 
-    def __init__(self, index, type, ctlr=None):
+    def __init__(self, index, gate_name, ctlr=None, gate=None):
         """
         Parameters
         ----------
         qubit_index : int
             qubit index
-        gate_type : str
+        gate_name : str
             gate identifier
         ctlr : [int]?
             control qubit indexes list
         """
         self.qubit_index = index
-        self.gate = Gate(type, ctlr)
+        self.gate = Gate(gate_name, ctlr, gate)
 
     def get_gate(self):
         return self.gate
@@ -44,5 +43,5 @@ class Column:
                 if control_qubit.get_beta() != 1:
                     return
         print(qubit_state_vector)
-        qubit.set_state_vector(qubit_state_vector @ self.gate.get_gate_matrix())
+        qubit.set_state_vector(qubit_state_vector @ get_gate_by_name(self.gate.get_gate_name()))
         print(qubit.get_state_vector())
