@@ -13,19 +13,21 @@ class Column:
         the quantum gate we are applying at this specific index
     """
 
-    def __init__(self, index, gate_name, ctlr=None, gate=None):
+    def __init__(self, index, gate_name, ctlr=None, gate_matrix=None):
         """
         Parameters
         ----------
-        qubit_index : int
+        index : int
             qubit index
         gate_name : str
             gate identifier
         ctlr : [int]?
             control qubit indexes list
+        gate_matrix : np.array([])?
+            unitary gate matrix
         """
         self.qubit_index = index
-        self.gate = Gate(gate_name, ctlr, gate)
+        self.gate = Gate(gate_name, ctlr, gate_matrix)
 
     def get_gate(self):
         return self.gate

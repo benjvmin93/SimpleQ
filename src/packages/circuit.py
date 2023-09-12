@@ -38,7 +38,6 @@ class Circuit:
         self.circuit = []
         self.gate_register = []
         self.system_matrix = prepare_initial_state(qubit_amount)
-        # print(self.system_matrix)
         
     def get_quantum_register(self):
         return self.quantum_register
