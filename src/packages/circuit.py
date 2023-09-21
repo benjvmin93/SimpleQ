@@ -54,6 +54,23 @@ class Circuit:
     def delete_qubit(self, index):
         self.quantum_register.pop(index)
 
+    def update_qubits(self):
+        # iterate through every possible states
+        for i in range(2 ** len(self.quantum_register)):
+            bitstring = str(bin(i)[2:]).zfill(len(self.quantum_register))
+            print(bitstring)
+            # iterate through bitstring
+            for j in range(len(bitstring)):
+                qubit_val = int(bitstring[j])
+                qubit = self.quantum_register[j]
+
+                if qubit_val == 0:
+                    qubit.set_alpha(qubit.get_alpha() + self.system_matrix[i] ** 2)
+                if qubit_val == 1:
+                    qubit.set_beta(qubit.get_beta() + self.system_matrix[i] ** 2)
+        for q in self.quantum_register:
+            q.print_state()
+
     def set_gate(self, gate_name, index, ctrl=None):
         """
         Add a gate to the circuit.
@@ -112,7 +129,8 @@ class Circuit:
 
     def launch_circuit(self):
         for column in self.circuit:
-            self.system_matrix = column.apply_column(self.system_matrix, self.quantum_register)
+            self.system_matrix = column.apply_column(self.system_matrix, len(self.quantum_register))
+            self.update_qubits()
             
     def print_results(self):
         for qubit in self.quantum_register:

@@ -58,25 +58,23 @@ class Column:
     def get_index(self):
         return self.qubit_index
     
-    def apply_column(self, system_matrix, quantum_register):
+    def apply_column(self, system_matrix, len_register):
         controls = self.gate.get_ctrl()
         index = self.get_index()
-        len_register = len(quantum_register)
-        system_matrix = None
+        gate_name = self.get_gate().get_gate_name()
+
+        print(f"Applying matrix {gate_name} on qubit {index}", f"with controls {controls}" if controls else f"without controls")
         
+
         if controls:
             for control in controls:
                 control_gate = get_control_matrix(self.get_gate()) # Control matrix on 2 qubits    
                 control_gate = build_unitary(control_gate, len_register, index, control)
-            system_matrix = control_gate @ system_matrix         
+                system_matrix = control_gate @ system_matrix
         else:
             gate = get_gate_by_name(self.get_gate().get_gate_name())
             gate = build_unitary(gate, len_register, index, -1)
             system_matrix = system_matrix @ gate
-        """
-            TODO:
-                - Update qubit states
-        """   
-        return system_matrix
-            
-        
+
+        print(f"New system vector obtained :", system_matrix)
+        return system_matrix 
