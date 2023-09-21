@@ -63,21 +63,16 @@ class Circuit:
             gate identifier
         index : int
             qubit index
-        columns : [Column]?
-            column list for custom gates
         ctrl : [int]?
             control qubit indexes
         """
-
+        
         implemented_gates = ["X", "Y", "Z", "H", "SWAP"]
-        if gate_name in implemented_gates:
-            self.circuit.append(Column(index, gate_name, ctrl))
-            return self
-        """
-        for gate in self.gate_register:
-            if gate_name == gate.get_gate_name():
-                self.circuit = []
-        """
+        if gate_name not in implemented_gates:
+            raise NameError(f"{gate_name} gate not found")
+        self.circuit.append(Column(index, gate_name, ctrl))
+        return self
+    
     def create_gate(self, gate_model) -> Gate:
         """
         Create a custom gate
@@ -117,7 +112,7 @@ class Circuit:
 
     def launch_circuit(self):
         for column in self.circuit:
-            column.apply_column(self.quantum_register)
+            self.system_matrix = column.apply_column(self.system_matrix, self.quantum_register)
             
     def print_results(self):
         for qubit in self.quantum_register:
