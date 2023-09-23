@@ -24,7 +24,7 @@ def prepare_initial_state(qubit_amount):
     matrix = np.array([1, 0])
     for _ in range(qubit_amount - 1):
         matrix = np.kron(matrix, np.array([1, 0]))
-    return matrix       
+    return matrix
 
 def get_gate_by_name(gate_name):
     if gate_name == "X":
