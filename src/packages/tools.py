@@ -54,9 +54,9 @@ class Gate:
     ctrl : [int]?
         list of control qubit's indexes
     """
-    def __init__(self, gate_name, ctrl, gate):
+    def __init__(self, gate_name, ctrl):
         self.gate_name = gate_name
-        self.gate = gate if gate is not None else get_gate_by_name(gate_name) 
+        self.gate = get_gate_by_name(gate_name) 
         self.ctrl = ctrl
 
     def get_ctrl(self):
@@ -67,9 +67,3 @@ class Gate:
     
     def get_gate(self):
         return self.gate
-    
-    def set_gate(self, gate):
-        self.gate = gate
-    
-    def set_ctrl(self, ctrl):
-        self.ctrl = ctrl
