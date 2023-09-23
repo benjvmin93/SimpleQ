@@ -1,23 +1,9 @@
 import numpy as np
 
 from src.QLibrary.SimpleQ import Column
-from src.QLibrary.SimpleQ.tools import get_gate_by_name
-from src.QLibrary.SimpleQ.tools import prepare_initial_state
-from src.QLibrary.SimpleQ.tools import Gate
+from src.QLibrary.SimpleQ.tools import *
 from src.QLibrary.SimpleQ.qubit import Qubit
-
-"""
-Circuit data representation:
-
-    "CIRCUIT": {
-        "QUBITS": int,
-        "GATES": {
-            "G1": ...,
-            "G2": ...,
-            ...
-        }
-    }
-"""
+from src.QLibrary.SimpleQ.logger import *
 
 class Circuit:
     """
@@ -38,7 +24,10 @@ class Circuit:
         self.circuit = []
         self.gate_register = []
         self.system_matrix = prepare_initial_state(qubit_amount)
-        
+        self.logger = logger
+        logger.log(f"Circuit - __init__: created new circuit with {str(len(self.quantum_register))} qubits.", LogLevels.INFO)
+        logger.log(f"Circuit - __init_: system matrix : {self.system_matrix}", LogLevels.DEBUG)
+
     def get_quantum_register(self):
         return self.quantum_register
     
@@ -80,14 +69,15 @@ class Circuit:
             gate identifier
         index : int
             qubit index
-        ctrl : [int]?
-            control qubit indexes
+        ctrl : int?
+            control qubit index
         """
         
-        implemented_gates = ["X", "Y", "Z", "H", "SWAP"]
+        implemented_gates = ["X", "Y", "Z", "H"]
         if gate_name not in implemented_gates:
             raise NameError(f"{gate_name} gate not found")
-        self.circuit.append(Column(index, gate_name, ctrl))
+        self.circuit.append(Column(logger, index, gate_name, ctrl))
+        logger.log(f"Circuit-set_gate : added {gate_name} gate at index {index}", LogLevels.INFO)
         return self
     
     def create_gate(self, gate_model) -> Gate:
@@ -130,8 +120,8 @@ class Circuit:
     def launch_circuit(self):
         for column in self.circuit:
             self.system_matrix = column.apply_column(self.system_matrix, len(self.quantum_register))
-            self.update_qubits()
-            
+        self.logger.log(f"Circuit-launch_circuit : Final obtained vector state : {self.system_matrix}", LogLevels.INFO)
+    
     def print_results(self):
         for qubit in self.quantum_register:
             qubit.print_state()
