@@ -42,23 +42,50 @@ class Circuit:
 
     def delete_qubit(self, index):
         self.quantum_register.pop(index)
+        
+    def get_logger(self):
+        return self.logger
 
+    
     def update_qubits(self):
+        """
+            Update qubit amplitudes using the system matrix.
+        """
+        # Reset qubit values (no worries because the new information are encoded in the system_matrix)
+        for qubit in self.quantum_register:
+            qubit.set_alpha(0)
+            qubit.set_beta(0)
+
         # iterate through every possible states
         for i in range(2 ** len(self.quantum_register)):
             bitstring = str(bin(i)[2:]).zfill(len(self.quantum_register))
-            print(bitstring)
             # iterate through bitstring
             for j in range(len(bitstring)):
                 qubit_val = int(bitstring[j])
                 qubit = self.quantum_register[j]
+                
+                self.logger.log(f"Circuit-update_qubits : state |{bitstring}>, qubit {j}", LogLevels.DEBUG)
+                
+                amplitude = np.abs(self.system_matrix[i] ** 2) * (self.system_matrix[i] / np.abs(self.system_matrix[i])) if self.system_matrix[i] != 0 else 0 # Using this formula, we conserve the negative values
+                
+                self.logger.log(f"Circuit-update_qubits : system_matrix[{i}] = {self.system_matrix[i]}. Computed amplitude = {amplitude}", LogLevels.DEBUG)
+                
+                if qubit_val == 0: # If qubit is |0> then we need to update amplitude alpha
+                    qubit.set_alpha(qubit.get_alpha() + amplitude)
+                if qubit_val == 1: # If qubit is |1> then we need to update amplitude beta
+                    qubit.set_beta(qubit.get_beta() + amplitude)
+                self.quantum_register[j] = qubit # Keep track of the qubit in the register
+        # Don't forget to normalize
+        for j in range (len(self.quantum_register)):
+            alpha = self.quantum_register[j].get_alpha()
+            beta = self.quantum_register[j].get_beta()
+            alpha = np.sqrt(np.abs(alpha)) * (alpha / np.abs(alpha)) if alpha != 0 else 0
+            beta = np.sqrt(np.abs(beta)) * (beta / np.abs(beta)) if beta != 0 else 0
+            qubit.set_alpha(alpha)
+            qubit.set_beta(beta)
+            self.logger.log(f"Circuit-update_qubits : qubit {j} = {qubit.get_str_state()}.", LogLevels.DEBUG)
 
-                if qubit_val == 0:
-                    qubit.set_alpha(qubit.get_alpha() + self.system_matrix[i] ** 2)
-                if qubit_val == 1:
-                    qubit.set_beta(qubit.get_beta() + self.system_matrix[i] ** 2)
-        for q in self.quantum_register:
-            q.print_state()
+
 
     def set_gate(self, gate_name, index, ctrl=None):
         """
@@ -120,11 +147,12 @@ class Circuit:
     def launch_circuit(self):
         for column in self.circuit:
             self.system_matrix = column.apply_column(self.system_matrix, len(self.quantum_register))
+            self.update_qubits()
         self.logger.log(f"Circuit-launch_circuit : Final obtained vector state : {self.system_matrix}", LogLevels.INFO)
-    
+
     def print_results(self):
         for qubit in self.quantum_register:
-            qubit.print_state()
+            print(qubit.get_str_state())
     
     def print_circuit(self):
         qubit_str = ["|0>" for _ in range(len(self.quantum_register))]

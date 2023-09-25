@@ -56,14 +56,15 @@ class Column:
         self.logger.log(f"Applying matrix {gate_name} on qubit {index} {log_control}", LogLevels.INFO)
         if control is not None:
             gate = get_control_matrix(self.get_gate()) # Control matrix on 2 qubits
-            self.logger.log(f"control matrix : {gate}", LogLevels.DEBUG)
-            gate = build_unitary(gate, len_register, index, control)
-            self.logger.log(f"Unitary gate : {gate}", LogLevels.DEBUG)
+            self.logger.log(f"Column-apply_column : control matrix : {gate}", LogLevels.DEBUG)
         else:
             gate = get_gate_by_name(self.get_gate().get_gate_name())
-            gate = build_unitary(gate, len_register, index, -1)
-            self.logger.log(f"Unitary gate : {gate}", LogLevels.DEBUG)
-
+            self.logger.log(f"Column-apply_column : Unitary gate : {gate}", LogLevels.DEBUG)
+        
+        gate = build_unitary(gate, len_register, index, control)
+        self.logger.log(f"Column-apply_column : Unitary gate : {gate}", LogLevels.DEBUG)
         system_matrix = gate @ system_matrix
-        self.logger.log(f"New system vector obtained : {system_matrix}", LogLevels.DEBUG)
-        return system_matrix 
+        
+        self.logger.log(f"Column-apply_column : New system vector obtained : {system_matrix}", LogLevels.DEBUG)
+        
+        return system_matrix / np.linalg.norm(system_matrix)
