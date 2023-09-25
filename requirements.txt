@@ -16,3 +16,7 @@ asyncpg
 
 fastapi-sqlalchemy
 SQLAlchemy~=1.4.49
+
+wheel
+
+setuptools

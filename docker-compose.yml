@@ -15,9 +15,10 @@ services:
     build:
       context: .  # Path to your FastAPI app's Dockerfile.alembic and application code
     container_name: fastapi-container
+    env_file: .env
     volumes:
       - .:/src
-    command: ["python", "init_uvicorn.py"]
+    command: ["./entrypoint.sh"]
     ports:
       - "8000:8000"
     depends_on:
@@ -32,7 +33,7 @@ services:
     container_name: alembic-container
     env_file: .env
     environment:
-      ALEMBIC_MODE: upgrade  # init | upgrade | reset | none
+      ALEMBIC_MODE: init  # init | upgrade | reset | none
     command: ["./src/API/entrypoint.sh"]
     volumes:
       - .:/src/API

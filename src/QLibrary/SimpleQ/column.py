@@ -1,5 +1,6 @@
-from src.packages.tools import Gate
-from src.packages.tools import get_gate_by_name
+from src.QLibrary.SimpleQ.tools import Gate
+from src.QLibrary.SimpleQ.tools import get_gate_by_name
+
 
 class Column:
     """
@@ -29,12 +30,19 @@ class Column:
         self.qubit_index = index
         self.gate = Gate(gate_name, ctlr, gate_matrix)
 
+    def column_to_json(self):
+        column_json = {
+            "qubit_index": str(self.qubit_index),
+            "qubit_information": self.gate.gate_to_json()
+        }
+        return column_json
+
     def get_gate(self):
         return self.gate
-    
+
     def get_index(self):
         return self.qubit_index
-    
+
     def apply_column(self, quantum_register):
         qubit = quantum_register[self.qubit_index]
         qubit_state_vector = qubit.get_state_vector()

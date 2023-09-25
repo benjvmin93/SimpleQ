@@ -1,7 +1,7 @@
-import pytest
 import numpy as np
 
-from context import circuit
+from src.QLibrary.SimpleQ import circuit
+
 
 def test_X_gate():
     """

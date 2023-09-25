@@ -1,2 +1,6 @@
 __pycache__
 .idea
+QLibrary/build
+QLibrary/dist
+QLibrary/SimpleQ.egg-info
+API/SimpleQ-*-py3-none-any.whl
