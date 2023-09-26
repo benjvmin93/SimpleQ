@@ -36,10 +36,9 @@ class Circuit:
 
     def __init__(self, qubit_amount):
         self.quantum_register = [Qubit() for _ in range(qubit_amount)]
+        self.system_matrix = prepare_initial_state(qubit_amount)
         self.circuit = []
         self.gate_register = []
-        self.system_matrix = prepare_initial_state(qubit_amount)
-        self.logger = logger
         logger.log(f"Circuit - __init__: created new circuit with {str(len(self.quantum_register))} qubits.", LogLevels.INFO)
         logger.log(f"Circuit - __init_: system matrix : {self.system_matrix}", LogLevels.DEBUG)
 
@@ -52,14 +51,14 @@ class Circuit:
     def get_system_matrix(self):
         return self.system_matrix
     
-    def add_qubit(self, index):
-        self.quantum_register.insert(index, Qubit())
+    def add_qubit(self, index=None):
+        if index is None:
+            self.quantum_register.append(Qubit())
+        else:
+            self.quantum_register.insert(index, Qubit())
 
     def delete_qubit(self, index):
         self.quantum_register.pop(index)
-        
-    def get_logger(self):
-        return self.logger
 
     def update_qubits(self):
         """
@@ -78,11 +77,11 @@ class Circuit:
                 qubit_val = int(bitstring[j])
                 qubit = self.quantum_register[j]
                 
-                self.logger.log(f"Circuit-update_qubits : state |{bitstring}>, qubit {j}", LogLevels.DEBUG)
+                logger.log(f"Circuit-update_qubits : state |{bitstring}>, qubit {j}", LogLevels.DEBUG)
                 
                 amplitude = np.abs(self.system_matrix[i] ** 2) * (self.system_matrix[i] / np.abs(self.system_matrix[i])) if self.system_matrix[i] != 0 else 0 # Using this formula, we conserve the negative values
                 
-                self.logger.log(f"Circuit-update_qubits : system_matrix[{i}] = {self.system_matrix[i]}. Computed amplitude = {amplitude}", LogLevels.DEBUG)
+                logger.log(f"Circuit-update_qubits : system_matrix[{i}] = {self.system_matrix[i]}. Computed amplitude = {amplitude}", LogLevels.DEBUG)
                  
                 if qubit_val == 0: # If qubit is |0> then we need to update amplitude alpha
                     qubit.set_alpha(qubit.get_alpha() + amplitude)
@@ -97,9 +96,7 @@ class Circuit:
             beta = np.sqrt(np.abs(beta)) * (beta / np.abs(beta)) if beta != 0 else 0
             qubit.set_alpha(alpha)
             qubit.set_beta(beta)
-            self.logger.log(f"Circuit-update_qubits : qubit {j} = {qubit.get_str_state()}.", LogLevels.DEBUG)
-
-
+            logger.log(f"Circuit-update_qubits : qubit {j} = {qubit.get_str_state()}.", LogLevels.DEBUG)
 
     def set_gate(self, gate_name, index, ctrl=None):
         """
@@ -117,7 +114,7 @@ class Circuit:
         implemented_gates = ["X", "Y", "Z", "H", "SWAP"]
         if gate_name not in implemented_gates:
             raise NameError(f"{gate_name} gate not found")
-        self.circuit.append(Column(logger, index, gate_name, ctrl))
+        self.circuit.append(Column(index, gate_name, ctrl))
         logger.log(f"Circuit-set_gate : added {gate_name} gate at index {index}", LogLevels.INFO)
         return self
     
@@ -161,7 +158,7 @@ class Circuit:
     def launch_circuit(self):
         for column in self.circuit:
             self.system_matrix = column.apply_column(self.system_matrix, len(self.quantum_register))
-        self.logger.log(f"Circuit-launch_circuit : Final obtained vector state : {self.system_matrix}", LogLevels.INFO)
+        logger.log(f"Circuit-launch_circuit : Final obtained vector state : {self.system_matrix}", LogLevels.INFO)
 
     def print_results(self):
         for qubit in self.quantum_register:
