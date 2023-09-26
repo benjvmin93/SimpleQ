@@ -15,13 +15,16 @@ def get_control_matrix(gate):
     return control_gate
 
 def build_unitary(gate_matrix, len_register, target_index, control_index):
+    unitary = 1
     for i in range(len_register):
         if control_index is not None and i == control_index:
             continue
         if i < target_index:
-            gate_matrix = np.kron(np.identity(2), gate_matrix)
+            unitary = np.kron(np.identity(2), unitary)
+        if i == target_index:
+            unitary = np.kron(gate_matrix, unitary)
         if i > target_index:
-            gate_matrix = np.kron(gate_matrix, np.identity(2))
+            gate_matrix = np.kron(unitary, np.identity(2))
     return gate_matrix
 
 
@@ -73,7 +76,6 @@ class Column:
             self.logger.log(f"Column-apply_column : control matrix : {gate}", LogLevels.DEBUG)
         else:
             gate = get_gate_by_name(self.get_gate().get_gate_name())
-            self.logger.log(f"Column-apply_column : Unitary gate : {gate}", LogLevels.DEBUG)
         
         gate = build_unitary(gate, len_register, index, control)
         self.logger.log(f"Column-apply_column : Unitary gate : {gate}", LogLevels.DEBUG)

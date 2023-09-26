@@ -35,11 +35,6 @@ def get_gate_by_name(gate_name):
         return np.array([[1, 0], [0, -1]])
     if gate_name == "H":
         return np.array([[1, 1], [1, -1]]) / np.sqrt(2)
-    if gate_name == "SWAP":
-        return np.array([[1, 0, 0, 0],
-                         [0, 0, 1, 0],
-                         [0, 1, 0, 0],
-                         [0, 0, 0, 1]])
 
 class Gate:
     """

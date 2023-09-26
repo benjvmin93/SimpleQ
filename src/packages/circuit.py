@@ -61,7 +61,6 @@ class Circuit:
     def get_logger(self):
         return self.logger
 
-    
     def update_qubits(self):
         """
             Update qubit amplitudes using the system matrix.
@@ -84,7 +83,7 @@ class Circuit:
                 amplitude = np.abs(self.system_matrix[i] ** 2) * (self.system_matrix[i] / np.abs(self.system_matrix[i])) if self.system_matrix[i] != 0 else 0 # Using this formula, we conserve the negative values
                 
                 self.logger.log(f"Circuit-update_qubits : system_matrix[{i}] = {self.system_matrix[i]}. Computed amplitude = {amplitude}", LogLevels.DEBUG)
-                
+                 
                 if qubit_val == 0: # If qubit is |0> then we need to update amplitude alpha
                     qubit.set_alpha(qubit.get_alpha() + amplitude)
                 if qubit_val == 1: # If qubit is |1> then we need to update amplitude beta
@@ -162,7 +161,6 @@ class Circuit:
     def launch_circuit(self):
         for column in self.circuit:
             self.system_matrix = column.apply_column(self.system_matrix, len(self.quantum_register))
-            self.update_qubits()
         self.logger.log(f"Circuit-launch_circuit : Final obtained vector state : {self.system_matrix}", LogLevels.INFO)
 
     def print_results(self):
