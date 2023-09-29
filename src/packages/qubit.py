@@ -12,6 +12,3 @@ class Qubit:
 
     def set_state_vector(self, state_vector):
         self.state = state_vector
-
-    def get_str_state(self):
-        return f"{self.state_vector[0]}|0> + {self.state_vector[1]}|1>"

@@ -1,32 +1,7 @@
 import numpy as np
 
-from src.packages.tools import Gate
-from src.packages.tools import get_gate_by_name
+from src.packages.tools import Gate, get_gate_by_name, get_control_matrix, build_unitary
 from src.packages.logger import LogLevels, logger
-
-def get_control_matrix(gate):
-    gate = get_gate_by_name(gate.get_gate_name())
-    control_gate = np.identity(4)
-    identity_rows, identity_cols = control_gate.shape
-    inserted_rows, inserted_cols = gate.shape   
-    
-    control_gate[identity_rows - inserted_rows:, identity_cols - inserted_cols:] = gate
-    
-    return control_gate
-
-def build_unitary(gate_matrix, len_register, target_index, control_index):
-    unitary = 1
-    for i in range(len_register):
-        if control_index is not None and i == control_index:
-            continue
-        if i < target_index:
-            unitary = np.kron(np.identity(2), unitary)
-        if i == target_index:
-            unitary = np.kron(gate_matrix, unitary)
-        if i > target_index:
-            gate_matrix = np.kron(unitary, np.identity(2))
-    return gate_matrix
-
 
 class Column:
     """
@@ -73,8 +48,10 @@ class Column:
             logger.log(f"Column-apply_column : control matrix : {gate}", LogLevels.DEBUG)
         else:
             gate = get_gate_by_name(self.get_gate().get_gate_name())
-        
-        gate = build_unitary(gate, len_register, index, control)
+
+
+        gate = build_unitary(gate, len_register, index, control)            
+            
         logger.log(f"Column-apply_column : Unitary gate : {gate}", LogLevels.DEBUG)
         system_matrix = gate @ system_matrix
         
