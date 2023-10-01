@@ -26,8 +26,6 @@ def get_formated_datetime():
     formated_str_datetime = f"{dateTime.year}-{dateTime.month}-{dateTime.day} {dateTime.hour}:{dateTime.minute}:{dateTime.second}"
     return formated_str_datetime
 
-
-
 class Logger:
     def __init__(self, filename):
         self.filename = filename
@@ -59,5 +57,4 @@ class Logger:
 
         self.write_log(log)
         
-
 logger = Logger(log_file)
