@@ -68,6 +68,9 @@ class Circuit:
         else:
             self.quantum_register.insert(index, Qubit())
 
+    def get_classical_register(self):
+        return self.classical_register
+
     def delete_qubit(self, index):
         self.quantum_register.pop(index)
 
