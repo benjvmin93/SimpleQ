@@ -38,6 +38,12 @@ def get_gate_by_name(gate_name):
     if gate_name == "M":
         return np.array([[1, 0], [0, 0]])
 
+def get_SWAP_gate():
+    return np.array([[1, 0, 0, 0], 
+                     [0, 0, 1, 0], 
+                     [0, 1, 0, 0], 
+                     [0, 0, 0, 1]])
+
 def get_control_matrix(gate):
     gate = get_gate_by_name(gate.get_gate_name())
     control_gate = np.identity(4)
@@ -48,8 +54,52 @@ def get_control_matrix(gate):
     
     return control_gate
 
-def build_unitary(gate_matrix, len_register, target_index, control_index=None):
+def get_swap_unitary(len_register, q0, q1):
+    """
+        Handles non-adjacent qubit SWAP.
+        
+        Parameters
+        ----------
+        len_register : int
+            quantum register length
+        q0, q1 : int
+            qubit to swap indexes
+    """
+    if q0 < 0 or q0 >= len_register or q1 < 0 or q1 >= len_register:
+        raise ValueError("Invalid qubit index")
+    
+    SWAP_gate = get_SWAP_gate()
     unitary = 1
+    min_qubit = min(q0, q1)
+    max_qubit = max(q0, q1)
+    permutation_matrices = []
+    permutation_matrix = 1
+    
+    dist = max_qubit - min_qubit
+    print(dist)
+    # Build permutation matrices
+    for i in range(dist):
+        permutation_matrix = np.kron(np.identity(2**((len_register - 1) - max_qubit)), permutation_matrix)
+        print(f"{i}: {permutation_matrix}", "\n================")
+        permutation_matrix = np.kron(SWAP_gate, permutation_matrix)
+        print(f"{i}: {permutation_matrix}", "\n================")
+        max_qubit -= 1
+        dist = max_qubit - min_qubit
+        permutation_matrix = np.kron(np.identity(2 ** max_qubit), permutation_matrix)
+        print(f"{i}: {permutation_matrix}", "\n================")
+        permutation_matrices.append(permutation_matrix)
+        permutation_matrix = 1
+    # Build unitary
+    unitary = permutation_matrices[0]
+    for perm_matrix in permutation_matrices[1:]:
+        unitary = unitary @ perm_matrix
+    for perm_matrix in permutation_matrices[:-1]:
+        unitary = unitary @ perm_matrix
+    
+    return unitary
+
+def build_unitary(gate_matrix, len_register, target_index, control_index=None):
+    unitary = 1    
     for i in range(len_register - 1, -1, -1):
         if control_index is not None and i == control_index:
             continue
