@@ -1,9 +1,8 @@
 import numpy as np
 
 from src.QLibrary.SimpleQ.column import Column
-from src.QLibrary.SimpleQ.tools import get_gate_by_name
-from src.QLibrary.SimpleQ.tools import prepare_initial_state
-from src.QLibrary.SimpleQ.tools import Gate
+from src.QLibrary.SimpleQ.tools import Gate, get_gate_by_name, prepare_initial_state, build_unitary, get_distribution
+from src.QLibrary.SimpleQ.logger import *
 from src.QLibrary.SimpleQ.qubit import Qubit
 
 import json
@@ -38,9 +37,11 @@ class Circuit:
 
     def __init__(self, qubit_amount):
         self.quantum_register = [Qubit() for _ in range(qubit_amount)]
-        self.circuit = []
-        self.gate_register = []
         self.system_matrix = prepare_initial_state(qubit_amount)
+        self.circuit = []
+        self.classical_register = [None for _ in range(qubit_amount)]
+        logger.log(f"Circuit - __init__: created new circuit with {str(len(self.quantum_register))} qubits.", LogLevels.INFO)
+        logger.log(f"Circuit - __init_: system matrix : {self.system_matrix}", LogLevels.DEBUG)
 
     def circuit_to_json(self):
         circ = []
@@ -61,8 +62,11 @@ class Circuit:
     def get_system_matrix(self):
         return self.system_matrix
 
-    def add_qubit(self, index):
-        self.quantum_register.insert(index, Qubit())
+    def add_qubit(self, index=None):
+        if index is None:
+            self.quantum_register.append(Qubit())
+        else:
+            self.quantum_register.insert(index, Qubit())
 
     def delete_qubit(self, index):
         self.quantum_register.pop(index)
@@ -76,65 +80,68 @@ class Circuit:
             gate identifier
         index : int
             qubit index
-        columns : [Column]?
-            column list for custom gates
-        ctrl : [int]?
-            control qubit indexes
+        ctrl : int?
+            control qubit index
         """
-
+        
         implemented_gates = ["X", "Y", "Z", "H", "SWAP"]
-        if gate_name in implemented_gates:
-            self.circuit.append(Column(index, gate_name, ctrl))
-            return self
-        """
-        for gate in self.gate_register:
-            if gate_name == gate.get_gate_name():
-                self.circuit = []
-        """
+        if gate_name not in implemented_gates:
+            raise NameError(f"{gate_name} gate not found")
+        self.circuit.append(Column(index, gate_name, ctrl))
+        logger.log(f"Circuit-set_gate : added {gate_name} gate at index {index}", LogLevels.INFO)
+        return self
 
-    def create_gate(self, gate_model) -> Gate:
-        """
-        Create a custom gate
-        Parameters
-        ----------
-        gate_model : dict
-            Gate data representation
-        """
+    def measure(self, index, shots=1000, simulation=False):
+        psi = self.system_matrix
+        # Our measurement operators in the {|0>,|1>} basis
+        M0 = np.array([[1, 0],
+                       [0, 0]])
+        M1 = np.array([[0, 0],
+                       [0, 1]])
 
-        # Reverse block list so we compute the gate unitary matrix from right to left in the circuit.
-        reversed_block_list = []
-        for block in gate_model["BLOCKS"]:
-            reversed_block_list.append(block)
-        reversed_block_list.reverse()
+        # Build unitary measurement operators
+        M0 = build_unitary(M0, len(self.quantum_register), index)
+        M1 = build_unitary(M1, len(self.quantum_register), index)
 
-        circuit_qubits = len(self.quantum_register)
-        qubit_matrices = [np.identity(2) for _ in range(
-            circuit_qubits)]  # Create a list of gate matrices that have to be applied for each qubits in the system
-
-        for block in reversed_block_list:
-            qubit_matrix = qubit_matrices[block["index"]]  # Get the right qubit which the gate will be applied on
-            qubit_matrices[block["index"]] = np.dot(qubit_matrix, get_gate_by_name(
-                block["name"]))  # compute matrices multiplication between the two gate matrices
-
-        unitary = None  # Initialize the unitary gate that will apply all our gate to the global system
-        for m in qubit_matrices:  # Iterate through our gate matrices
-            if unitary is None:  # set the unitary to the gate matrix (only occurs at the first iteration)
-                unitary = m
-            else:
-                unitary = np.kron(unitary, m)  # Apply tensor product of our unitary with the gate matrix.
-                # Works because if the qubit matrix hasn't been touched, we end up with identity matrices
-                # corresponding to no changes within the qubit state.
-        gate = {  # Finally add our custom gate to the gate_register. It can be retrieve by its name.
-            "name": gate_model["NAME"],
-            "matrix": unitary
+        # Get associate probabilities to obtain 0 or 1
+        p0 = psi.conjugate() @ M0.conjugate().T @ M0 @ psi
+        p1 = psi.conjugate() @ M1.conjugate().T @ M1 @ psi
+        
+        results = {
+            "proba": {
+                "p0": p0,
+                "p1": p1, 
+            },
+            "simulation" : None
         }
-        self.gate_register.append(gate)
+        if simulation == True:
+            # Get probability statistics
+            distribution = get_distribution(p0, p1, shots)
+            # Perform measurement according to probabilities
+            measure = np.random.choice([0, 1], size=1, p=[p0, p1])
+            simulation = {
+                "distribution": distribution,
+                "measurement": measure[0]
+            }
+            results["simulation"] = simulation
+            # Update state vector
+            if measure[0] == 0:
+                psi = (M0 @ psi) / np.sqrt(p0)
+            else:
+                psi = (M1 @ psi) / np.sqrt(p1)
+            self.system_matrix = psi
 
-        return gate
+        self.classical_register[index] = results
+        return results
 
+    def measure_all(self, shots=1000, simulation=False):
+        for i in range(len(self.quantum_register)):
+            self.measure(i, shots, simulation)
+    
     def launch_circuit(self):
         for column in self.circuit:
-            column.apply_column(self.quantum_register)
+            self.system_matrix = column.apply_column(self.system_matrix, len(self.quantum_register))
+        logger.log(f"Circuit-launch_circuit : Final obtained vector state : {self.system_matrix}", LogLevels.INFO)
 
     def print_results(self):
         for qubit in self.quantum_register:
