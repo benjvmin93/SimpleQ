@@ -87,7 +87,7 @@ class Circuit:
             control qubit index
         """
         
-        implemented_gates = ["X", "Y", "Z", "H", "SWAP"]
+        implemented_gates = ["X", "Y", "Z", "H"]
         if gate_name not in implemented_gates:
             raise NameError(f"{gate_name} gate not found")
         self.circuit.append(Column(index, gate_name, ctrl))

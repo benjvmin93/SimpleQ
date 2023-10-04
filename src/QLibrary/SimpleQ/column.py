@@ -1,7 +1,7 @@
 import numpy as np
 
 from src.QLibrary.SimpleQ.tools import Gate
-from src.QLibrary.SimpleQ.tools import get_gate_by_name, get_control_matrix, build_unitary
+from src.QLibrary.SimpleQ.tools import get_gate_by_name, get_control_matrix, build_unitary, get_swap_unitary
 from src.QLibrary.SimpleQ.logger import logger, LogLevels
 
 class Column:
@@ -43,24 +43,43 @@ class Column:
         return self.qubit_index
     
     def apply_column(self, system_matrix, len_register):
-        control = self.gate.get_ctrl()
+        gate = self.get_gate()
+        control = gate.get_ctrl()
         index = self.get_index()
-        gate_name = self.get_gate().get_gate_name()
-        gate = None
         
+        swap_matrices = []
         log_control = f"with control {control}" if control is not None else f"without control"
-        logger.log(f"Applying matrix {gate_name} on qubit {index} {log_control}", LogLevels.INFO)
+        logger.log(f"Applying matrix {gate.get_name()} on qubit {index} {log_control}", LogLevels.INFO)
+
         if control is not None:
-            gate = get_control_matrix(self.get_gate()) # Control matrix on 2 qubits
-            logger.log(f"Column-apply_column : control matrix : {gate}", LogLevels.DEBUG)
+            # Transpiler job
+            if control != index - 1:
+                logger.log(f"control: {control}, index: {index}", LogLevels.DEBUG)
+                while control < index - 1:
+                    swap_matrices.append(get_swap_unitary(len_register, control, control + 1))
+                    control += 1
+                    logger.log(f"control: {control}, index: {index}", LogLevels.DEBUG)
+                while control > index + 1:
+                    swap_matrices.append(get_swap_unitary(len_register, control, control - 1))
+                    control -= 1
+                    logger.log(f"control: {control}, index: {index}", LogLevels.DEBUG)
+                if control == index + 1:
+                    swap_matrices.append(get_swap_unitary(len_register, control, index))
+                logger.log(f"control: {control - 1}, index: {index + 1}", LogLevels.DEBUG)
+            gate = get_control_matrix(gate) # Control matrix on 2 qubits
         else:
-            gate = get_gate_by_name(self.get_gate().get_gate_name())
+            gate = get_gate_by_name(gate.get_name())
+        gate = build_unitary(gate, len_register, index, control)
+        unitary = swap_matrices[0] if len(swap_matrices) != 0 else gate
+        if swap_matrices != []:
+            for swap_matrix in swap_matrices[1:]:
+                unitary = unitary @ swap_matrix
+            unitary = unitary @ gate
+            for swap_matrix in reversed(swap_matrices):
+                unitary = unitary @ swap_matrix
 
-
-        gate = build_unitary(gate, len_register, index, control)            
-            
         logger.log(f"Column-apply_column : Unitary gate : {gate}", LogLevels.DEBUG)
-        system_matrix = gate @ system_matrix
+        system_matrix = unitary @ system_matrix
         
         logger.log(f"Column-apply_column : New system vector obtained : {system_matrix}", LogLevels.DEBUG)
         

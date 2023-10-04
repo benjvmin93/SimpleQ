@@ -45,7 +45,7 @@ def get_SWAP_gate():
                      [0, 0, 0, 1]])
 
 def get_control_matrix(gate):
-    gate = get_gate_by_name(gate.get_gate_name())
+    gate = get_gate_by_name(gate.get_name())
     control_gate = np.identity(4)
     identity_rows, identity_cols = control_gate.shape
     inserted_rows, inserted_cols = gate.shape   
@@ -76,17 +76,13 @@ def get_swap_unitary(len_register, q0, q1):
     permutation_matrix = 1
     
     dist = max_qubit - min_qubit
-    print(dist)
     # Build permutation matrices
     for i in range(dist):
         permutation_matrix = np.kron(np.identity(2**((len_register - 1) - max_qubit)), permutation_matrix)
-        print(f"{i}: {permutation_matrix}", "\n================")
         permutation_matrix = np.kron(SWAP_gate, permutation_matrix)
-        print(f"{i}: {permutation_matrix}", "\n================")
         max_qubit -= 1
         dist = max_qubit - min_qubit
         permutation_matrix = np.kron(np.identity(2 ** max_qubit), permutation_matrix)
-        print(f"{i}: {permutation_matrix}", "\n================")
         permutation_matrices.append(permutation_matrix)
         permutation_matrix = 1
     # Build unitary
@@ -148,7 +144,7 @@ class Gate:
     def get_ctrl(self):
         return self.ctrl
 
-    def get_gate_name(self):
+    def get_name(self):
         return self.gate_name
     
     def get_gate(self):
