@@ -38,7 +38,7 @@ class Column:
         the quantum gate we are applying at this specific index
     """
 
-    def __init__(self, index, gate_name, ctlr=None, gate_matrix=None):
+    def __init__(self, index, gate_name, ctlr=[], gate_matrix=None):
         """
         Parameters
         ----------
