@@ -78,6 +78,19 @@ def test_X_gate_with_control_index_after_target_index():
     cmp = system_matrix == np.array([0, 0, 0, 1])
     assert cmp.all()
     
+def test_H_gate_with_control_index_after_target_index():
+    """
+    One control qubit test.
+    Prepared state : 1/sqrt(2) (|01> + |00>)
+    Desired output state : 1/sqrt(2) (|11> + |00>)
+    """
+    circ = circuit.Circuit(2)
+    circ.set_gate("H", 1).set_gate("X", 0, ctrl=1)
+    circ.launch_circuit()
+    system_matrix = circ.get_system_matrix()
+    cmp = system_matrix == np.array([pytest.approx(1/np.sqrt(2)), 0, 0, pytest.approx(1/np.sqrt(2))])
+    assert cmp.all()
+
 def test_SWAP_gate():
     """
     Prepared state : |01>
@@ -95,7 +108,7 @@ def test_SWAP_gate():
     
     cmp = result == [0, 0, 1, 0]
     assert cmp.all()
-    
+
 def test_SWAP_gate_2():
     """
     Prepared state : |10>
@@ -112,6 +125,25 @@ def test_SWAP_gate_2():
     result = unitary @ state_vector
     
     cmp = result == [0, 1, 0, 0]
+    assert cmp.all()
+
+@pytest.mark.skip()
+def test_SWAP_gate_2_entangled():
+    """
+    Prepared state : 1/sqrt(2) (|01> + |10>)
+    Desired output state : 1/sqrt(2) (|10> - |01>)
+    """
+    circ = circuit.Circuit(2)
+    circ.set_gate("X", 0).set_gate("H", 0).set_gate("X", 1, ctrl=0)
+    
+    circ.launch_circuit()
+    
+    unitary = tools.get_swap_unitary(len(circ.get_quantum_register()), 0, 1)
+    
+    state_vector = circ.get_system_matrix()
+    result = unitary @ state_vector
+    print(result)
+    cmp = result == [0, pytest.approx(1/np.sqrt(2)), pytest.approx(- 1/np.sqrt(2)), 0]
     assert cmp.all()
     
 def test_SWAP_gate_3():
@@ -266,7 +298,7 @@ def test_SWAP_gate_9():
     cmp = result == [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     assert cmp.all()
     
-def test_SWAP_gate_9():
+def test_SWAP_gate_10():
     """
     Test on non-adjacent qubits.
     Prepared state : |0100>
@@ -285,6 +317,64 @@ def test_SWAP_gate_9():
     cmp = result == [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     assert cmp.all()
 
+def test_SWAP_gate_11():
+    """
+    Test on non-adjacent qubits.
+    Prepared state : |10000>
+    Desired output state : |00001>
+    """
+    circ = circuit.Circuit(5)
+    circ.set_gate("X", 0)
+
+    circ.launch_circuit()
+
+    unitary = tools.get_swap_unitary(len(circ.get_quantum_register()), 0, 4)
+
+    state_vector = circ.get_system_matrix()
+    result = unitary @ state_vector
+
+    m = np.zeros(2**5)
+    m[1] = 1
+    cmp = result == m
+    assert cmp.all()
+    
+def test_SWAP_gate_12():
+    """
+    Test on non-adjacent qubits.
+    Prepared state : |10000>
+    Desired output state : |00100>
+    """
+    circ = circuit.Circuit(5)
+    circ.set_gate("X", 0)
+
+    circ.launch_circuit()
+
+    unitary = tools.get_swap_unitary(len(circ.get_quantum_register()), 0, 2)
+
+    state_vector = circ.get_system_matrix()
+    result = unitary @ state_vector
+
+    m = np.zeros(2**5)
+    m[4] = 1
+    cmp = result == m
+    assert cmp.all()
+
+def test_SWAP_gate_13():
+    """
+    Test on non-adjacent qubits.
+    Prepared state : 1/sqrt(2) (|001> + |000>)
+    Desired output state : 1/sqrt(2) (|100> + |000>)
+    """
+    circ = circuit.Circuit(3)
+    circ.set_gate("H", 2)
+    circ.launch_circuit()
+    
+    unitary = tools.get_swap_unitary(len(circ.get_quantum_register()), 0, 2)
+    state_vector = circ.get_system_matrix()
+    result = unitary @ state_vector
+    
+    cmp = result == [pytest.approx(1/np.sqrt(2)), 0, 0, 0, pytest.approx(1/np.sqrt(2)), 0, 0, 0]
+    
 def test_Bell_state_plus():
     """
     Prepared state : |00>
@@ -299,3 +389,108 @@ def test_Bell_state_plus():
     comparison = system_matrix == [pytest.approx(1/np.sqrt(2)), 0, 0, pytest.approx(1/np.sqrt(2))]
 
     assert comparison.all()
+    
+def test_control_between_non_adjacent_qubits_1():
+    """
+    Prepared state : |001>
+    Desired output state : |101>
+    """
+    circ = circuit.Circuit(3)
+    circ.set_gate("X", 2).set_gate("X", 0, ctrl=2)
+    circ.launch_circuit()
+    system_matrix = circ.get_system_matrix()
+    
+    cmp = system_matrix == [0, 0, 0, 0, 0, 1, 0, 0]
+    assert cmp.all()
+
+def test_control_between_non_adjacent_qubits_2():
+    """
+    Prepared state : |100>
+    Desired output state : |101>
+    """
+    circ = circuit.Circuit(3)
+    circ.set_gate("X", 0).set_gate("X", 2, ctrl=0)
+    circ.launch_circuit()
+    system_matrix = circ.get_system_matrix()
+    
+    cmp = system_matrix == [0, 0, 0, 0, 0, 1, 0, 0]
+    assert cmp.all()
+
+def test_control_between_non_adjacent_qubits_3():
+    """
+    Prepared state : |1000>
+    Desired output state : |1001>
+    """
+    circ = circuit.Circuit(4)
+    circ.set_gate("X", 0).set_gate("X", 3, ctrl=0)
+    circ.launch_circuit()
+    system_matrix = circ.get_system_matrix()
+    
+    cmp = system_matrix == [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+    assert cmp.all()
+    
+def test_control_between_non_adjacent_qubits_4():
+    """
+    Prepared state : |1000>
+    Desired output state : |1010>
+    """
+    circ = circuit.Circuit(4)
+    circ.set_gate("X", 0).set_gate("X", 2, ctrl=0)
+    circ.launch_circuit()
+    system_matrix = circ.get_system_matrix()
+    
+    cmp = system_matrix == [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]
+    assert cmp.all()
+    
+def test_control_between_non_adjacent_qubits_5():
+    """
+    Prepared state : |0001>
+    Desired output state : |1001>
+    """
+    circ = circuit.Circuit(4)
+    circ.set_gate("X", 3).set_gate("X", 0, ctrl=3)
+    circ.launch_circuit()
+    system_matrix = circ.get_system_matrix()
+    
+    cmp = system_matrix == [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+    assert cmp.all()
+
+def test_control_between_non_adjacent_qubits_5():
+    """
+    Prepared state : |0001>
+    Desired output state : |0101>
+    """
+    circ = circuit.Circuit(4)
+    circ.set_gate("X", 3).set_gate("X", 1, ctrl=3)
+    circ.launch_circuit()
+    system_matrix = circ.get_system_matrix()
+    
+    cmp = system_matrix == [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    assert cmp.all()
+    
+def test_control_between_non_adjacent_qubits_6():
+    """
+    Prepared state : |0010>
+    Desired output state : |1010>
+    """
+    circ = circuit.Circuit(4)
+    circ.set_gate("X", 3).set_gate("X", 0, ctrl=3)
+    circ.launch_circuit()
+    system_matrix = circ.get_system_matrix()
+    
+    cmp = system_matrix == [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+    assert cmp.all()
+
+def test_control_between_non_adjacent_qubits_7():
+    """
+    Prepared state : |0100>
+    Desired output state : |0101>
+    """
+    circ = circuit.Circuit(4)
+    circ.set_gate("X", 1).set_gate("X", 3, ctrl=1)
+    circ.launch_circuit()
+    system_matrix = circ.get_system_matrix()
+    
+    cmp = system_matrix == [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    assert cmp.all()
+    
