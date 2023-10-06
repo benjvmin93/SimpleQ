@@ -44,14 +44,12 @@ def get_SWAP_gate():
                      [0, 1, 0, 0], 
                      [0, 0, 0, 1]])
 
-def get_control_matrix(gate):
+def get_control_matrix(gate, len_controls):
+    control_gate = np.identity(2 ** (len_controls + 1))
     gate = get_gate_by_name(gate.get_name())
-    control_gate = np.identity(4)
     identity_rows, identity_cols = control_gate.shape
     inserted_rows, inserted_cols = gate.shape   
-    
     control_gate[identity_rows - inserted_rows:, identity_cols - inserted_cols:] = gate
-    
     return control_gate
 
 def get_swap_unitary(len_register, q0, q1):
@@ -94,10 +92,10 @@ def get_swap_unitary(len_register, q0, q1):
     
     return unitary
 
-def build_unitary(gate_matrix, len_register, target_index, control_index=None):
-    unitary = 1    
-    for i in range(len_register - 1, -1, -1):
-        if control_index is not None and i == control_index:
+def build_unitary(gate_matrix, len_register, target_index, control_indexes=[]):
+    unitary = 1
+    for i in reversed(range(len_register)):
+        if i in control_indexes:
             continue
         if i > target_index:
             unitary = np.kron(unitary, np.identity(2))

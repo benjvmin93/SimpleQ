@@ -44,43 +44,47 @@ class Column:
     
     def apply_column(self, system_matrix, len_register):
         gate = self.get_gate()
-        control = gate.get_ctrl()[0] if gate.get_ctrl() != [] else None
         index = self.get_index()
-        
-        swap_matrices = []
-        log_control = f"with control {control}" if control is not None else f"without control"
+        controls = gate.get_ctrl()
+
+        log_control = f"with control {controls}" if controls != [] else f"without control"
         logger.log(f"Applying matrix {gate.get_name()} on qubit {index} {log_control}", LogLevels.INFO)
-
-        if control is not None:
-            # Transpiler job
-            if control != index - 1:
-                logger.log(f"control: {control}, index: {index}", LogLevels.DEBUG)
-                while control < index - 1:
-                    swap_matrices.append(get_swap_unitary(len_register, control, control + 1))
-                    control += 1
-                    logger.log(f"control: {control}, index: {index}", LogLevels.DEBUG)
-                while control > index + 1:
-                    swap_matrices.append(get_swap_unitary(len_register, control, control - 1))
-                    control -= 1
-                    logger.log(f"control: {control}, index: {index}", LogLevels.DEBUG)
-                if control == index + 1:
-                    swap_matrices.append(get_swap_unitary(len_register, control, index))
-                logger.log(f"control: {control - 1}, index: {index + 1}", LogLevels.DEBUG)
-            gate = get_control_matrix(gate) # Control matrix on 2 qubits
-        else:
-            gate = get_gate_by_name(gate.get_name())
-        gate = build_unitary(gate, len_register, index, control)
-        unitary = swap_matrices[0] if len(swap_matrices) != 0 else gate
-        if swap_matrices != []:
-            for swap_matrix in swap_matrices[1:]:
-                unitary = unitary @ swap_matrix
-            unitary = unitary @ gate
-            for swap_matrix in reversed(swap_matrices):
-                unitary = unitary @ swap_matrix
-
-        logger.log(f"Column-apply_column : Unitary gate : {gate}", LogLevels.DEBUG)
-        system_matrix = unitary @ system_matrix
         
-        logger.log(f"Column-apply_column : New system vector obtained : {system_matrix}", LogLevels.DEBUG)
+        gate_matrix = get_gate_by_name(gate.get_name())
+        gate_matrix = build_unitary(gate_matrix, len_register, index, controls)
+
+        logger.log(f"Control gate: {gate_matrix}", LogLevels.DEBUG)
+        whole_unitary = np.identity(2 ** len_register)        
+
+        if controls == []:
+            whole_unitary = whole_unitary @ gate_matrix
+        else:
+            swap_matrices = []
+            for control in controls:
+                pos = control
+                # Transpiler job
+                if control > index or control < index - len(controls):
+                    while pos < index - len(controls):
+                        logger.log(f"SWAP between {pos} and {pos+1}", LogLevels.DEBUG)
+                        swap_matrices.append(get_swap_unitary(len_register, pos, pos + 1))
+                        pos += 1
+                    while pos >= index + 1:
+                        logger.log(f"SWAP between {pos} and {pos-1}", LogLevels.DEBUG)
+                        swap_matrices.append(get_swap_unitary(len_register, pos, pos - 1))
+                        pos -= 1
+            logger.log(f"Building control matrix for {gate.get_name()} gate and {len(controls)} controls", LogLevels.DEBUG)
+            gate_matrix = get_control_matrix(gate, len(controls))
+            gate_matrix = build_unitary(gate_matrix, len_register, index, controls)
+            unitary = swap_matrices[0] if swap_matrices != [] else gate_matrix
+            if swap_matrices != []:
+                for swap_matrix in swap_matrices[1:]:
+                    unitary = unitary @ swap_matrix
+                unitary = unitary @ gate_matrix
+                for swap_matrix in reversed(swap_matrices):
+                    unitary = unitary @ swap_matrix
+            whole_unitary = whole_unitary @ unitary
+
+        logger.log(f"Whole unitary: {whole_unitary} @ {system_matrix}", LogLevels.DEBUG)
+        system_matrix = whole_unitary @ system_matrix
         
         return system_matrix / np.linalg.norm(system_matrix)

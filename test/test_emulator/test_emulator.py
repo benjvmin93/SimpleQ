@@ -127,11 +127,10 @@ def test_SWAP_gate_2():
     cmp = result == [0, 1, 0, 0]
     assert cmp.all()
 
-@pytest.mark.skip()
 def test_SWAP_gate_2_entangled():
     """
-    Prepared state : 1/sqrt(2) (|01> + |10>)
-    Desired output state : 1/sqrt(2) (|10> - |01>)
+    Prepared state : 1/sqrt(2) (|00> - |11>)
+    Desired output state : 1/sqrt(2) (|00> - |11>)
     """
     circ = circuit.Circuit(2)
     circ.set_gate("X", 0).set_gate("H", 0).set_gate("X", 1, ctrl=[0])
@@ -143,9 +142,27 @@ def test_SWAP_gate_2_entangled():
     state_vector = circ.get_system_matrix()
     result = unitary @ state_vector
     print(result)
-    cmp = result == [0, pytest.approx(1/np.sqrt(2)), pytest.approx(- 1/np.sqrt(2)), 0]
-    assert cmp.all()
+    cmp = result == [pytest.approx(1/np.sqrt(2)), 0, 0, pytest.approx(- 1/np.sqrt(2))]
+    assert cmp.all() 
+
+def test_SWAP_gate_3_entangled():
+    """
+    Prepared state : 1/sqrt(2) (|01> - |10>)
+    Desired output state : 1/sqrt(2) (|10> - |01>)
+    """
+    circ = circuit.Circuit(2)
+    circ.set_gate("X", 0).set_gate("X", 1).set_gate("H", 0).set_gate("X", 1, ctrl=[0])
     
+    circ.launch_circuit()
+    
+    unitary = tools.get_swap_unitary(len(circ.get_quantum_register()), 0, 1)
+    
+    state_vector = circ.get_system_matrix()
+    result = unitary @ state_vector
+    print(result)
+    cmp = result == [0, pytest.approx(-1/np.sqrt(2)), pytest.approx(1/np.sqrt(2)), 0]
+    assert cmp.all() 
+
 def test_SWAP_gate_3():
     """
     Test on non-adjacent qubits.
@@ -375,6 +392,203 @@ def test_SWAP_gate_13():
     
     cmp = result == [pytest.approx(1/np.sqrt(2)), 0, 0, 0, pytest.approx(1/np.sqrt(2)), 0, 0, 0]
     
+    assert cmp.all()
+
+def test_Toffoli_gate_1():
+    """
+    Test on multi-control qubits.
+    Prepared state : |110>
+    Desired output state : |111>
+    """
+    circ = circuit.Circuit(3)
+    circ.set_gate("X", 0).set_gate("X", 1).set_gate("X", 2, ctrl=[0, 1])
+
+    circ.launch_circuit()
+    state_vector = circ.get_system_matrix()
+    cmp = state_vector == [0, 0, 0, 0, 0, 0, 0, 1]
+    
+    assert cmp.all()
+    
+def test_Toffoli_gate_2():
+    """
+    Test on multi-control qubits.
+    Prepared state : |100>
+    Desired output state : |100>
+    """
+    circ = circuit.Circuit(3)
+    circ.set_gate("X", 0).set_gate("X", 2, ctrl=[0, 1])
+
+    circ.launch_circuit()
+    state_vector = circ.get_system_matrix()
+    cmp = state_vector == [0, 0, 0, 0, 1, 0, 0, 0]
+    
+    assert cmp.all()
+
+def test_Toffoli_gate_3():
+    """
+    Test on multi-control qubits.
+    Prepared state : |101>
+    Desired output state : |111>
+    """
+    circ = circuit.Circuit(3)
+    circ.set_gate("X", 0).set_gate("X", 2).set_gate("X", 1, ctrl=[0, 2])
+
+    circ.launch_circuit()
+    state_vector = circ.get_system_matrix()
+    cmp = state_vector == [0, 0, 0, 0, 0, 0, 0, 1]
+    
+    assert cmp.all()
+
+def test_Toffoli_gate_4():
+    """
+    Test on multi-control qubits.
+    Prepared state : |011>
+    Desired output state : |111>
+    """
+    circ = circuit.Circuit(3)
+    circ.set_gate("X", 1).set_gate("X", 2).set_gate("X", 0, ctrl=[1, 2])
+
+    circ.launch_circuit()
+    state_vector = circ.get_system_matrix()
+    cmp = state_vector == [0, 0, 0, 0, 0, 0, 0, 1]
+    
+    assert cmp.all()
+
+def test_Toffoli_gate_5():
+    """
+    Test on multi-control qubits.
+    Prepared state : |001>
+    Desired output state : |001>
+    """
+    circ = circuit.Circuit(3)
+    circ.set_gate("X", 2).set_gate("X", 0, ctrl=[1, 2])
+
+    circ.launch_circuit()
+    state_vector = circ.get_system_matrix()
+    cmp = state_vector == [0, 1, 0, 0, 0, 0, 0, 0]
+    
+    assert cmp.all()
+
+def test_Toffoli_gate_6():
+    """
+    Test on multi-control qubits.
+    Prepared state : |000>
+    Desired output state : |000>
+    """
+    circ = circuit.Circuit(3)
+    circ.set_gate("X", 0, ctrl=[1, 2])
+
+    circ.launch_circuit()
+    state_vector = circ.get_system_matrix()
+    cmp = state_vector == [1, 0, 0, 0, 0, 0, 0, 0]
+    
+    assert cmp.all()
+
+def test_Toffoli_gate_7():
+    """
+    Test on multi-control qubits.
+    Prepared state : |111>
+    Desired output state : |011>
+    """
+    circ = circuit.Circuit(3)
+    circ.set_gate("X", 0).set_gate("X", 1).set_gate("X", 2).set_gate("X", 0, ctrl=[1, 2])
+
+    circ.launch_circuit()
+    state_vector = circ.get_system_matrix()
+    cmp = state_vector == [0, 0, 0, 1, 0, 0, 0, 0]
+    
+    assert cmp.all()
+
+def test_Toffoli_gate_8():
+    """
+    Test on multi-control qubits.
+    Prepared state : |111>
+    Desired output state : |101>
+    """
+    circ = circuit.Circuit(3)
+    circ.set_gate("X", 0).set_gate("X", 1).set_gate("X", 2).set_gate("X", 1, ctrl=[0, 2])
+
+    circ.launch_circuit()
+    state_vector = circ.get_system_matrix()
+    cmp = state_vector == [0, 0, 0, 0, 0, 1, 0, 0]
+    
+    assert cmp.all()
+    
+def test_Toffoli_gate_9():
+    """
+    Test on multi-control qubits.
+    Prepared state : |111>
+    Desired output state : |110>
+    """
+    circ = circuit.Circuit(3)
+    circ.set_gate("X", 0).set_gate("X", 1).set_gate("X", 2).set_gate("X", 2, ctrl=[0, 1])
+
+    circ.launch_circuit()
+    state_vector = circ.get_system_matrix()
+    cmp = state_vector == [0, 0, 0, 0, 0, 0, 1, 0]
+    
+    assert cmp.all()
+
+def test_Toffoli_gate_10():
+    """
+    Test on multi-control qubits.
+    Prepared state : |1100>
+    Desired output state : |1110>
+    """
+    circ = circuit.Circuit(4)
+    circ.set_gate("X", 0).set_gate("X", 1).set_gate("X", 2, ctrl=[0, 1])
+
+    circ.launch_circuit()
+    state_vector = circ.get_system_matrix()
+    cmp = state_vector == [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]
+    
+    assert cmp.all()
+
+def test_Toffoli_gate_11():
+    """
+    Test on multi-control qubits.
+    Prepared state : |1100>
+    Desired output state : |1110>
+    """
+    circ = circuit.Circuit(4)
+    circ.set_gate("X", 0).set_gate("X", 1).set_gate("X", 2, ctrl=[0, 1])
+
+    circ.launch_circuit()
+    state_vector = circ.get_system_matrix()
+    cmp = state_vector == [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]
+    
+    assert cmp.all()
+
+def test_Toffoli_gate_12():
+    """
+    Test on multi-control qubits.
+    Prepared state : |1110>
+    Desired output state : |1100>
+    """
+    circ = circuit.Circuit(4)
+    circ.set_gate("X", 0).set_gate("X", 1).set_gate("X", 2).set_gate("X", 2, ctrl=[0, 1])
+
+    circ.launch_circuit()
+    state_vector = circ.get_system_matrix()
+    cmp = state_vector == [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0]
+    
+    assert cmp.all()
+
+def test_Toffoli_gate_12():
+    """
+    Test on multi-control qubits.
+    Prepared state : |1001>
+    Desired output state : |1101>
+    """
+    circ = circuit.Circuit(4)
+    circ.set_gate("X", 0).set_gate("X", 3).set_gate("X", 1, ctrl=[0, 3])
+
+    circ.launch_circuit()
+    state_vector = circ.get_system_matrix()
+    cmp = state_vector == [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]
+    
+    assert cmp.all()
+
 def test_Bell_state_plus():
     """
     Prepared state : |00>
