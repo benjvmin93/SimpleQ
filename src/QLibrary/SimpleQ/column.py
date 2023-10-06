@@ -15,7 +15,7 @@ class Column:
     gate : Gate
         the quantum gate we are applying at this specific index
     """
-    def __init__(self, index, gate_name, ctrl=None):
+    def __init__(self, index, gate_name, ctrl=[]):
         """
         Parameters
         ----------
@@ -44,7 +44,7 @@ class Column:
     
     def apply_column(self, system_matrix, len_register):
         gate = self.get_gate()
-        control = gate.get_ctrl()
+        control = gate.get_ctrl()[0] if gate.get_ctrl() != [] else None
         index = self.get_index()
         
         swap_matrices = []

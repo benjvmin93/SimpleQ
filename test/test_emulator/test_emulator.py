@@ -58,7 +58,7 @@ def test_X_gate_with_one_control():
     """
     circ = circuit.Circuit(2)
     circ.set_gate("X", 0)   # state = |10>
-    circ.set_gate("X", 1, ctrl=0) # state = |11>
+    circ.set_gate("X", 1, ctrl=[0]) # state = |11>
     circ.launch_circuit()
 
     system_matrix = circ.get_system_matrix()
@@ -72,7 +72,7 @@ def test_X_gate_with_control_index_after_target_index():
     Desired output state : |11>
     """
     circ = circuit.Circuit(2)
-    circ.set_gate("X", 1).set_gate("X", 0, ctrl=1)
+    circ.set_gate("X", 1).set_gate("X", 0, ctrl=[1])
     circ.launch_circuit()
     system_matrix = circ.get_system_matrix()
     cmp = system_matrix == np.array([0, 0, 0, 1])
@@ -85,7 +85,7 @@ def test_H_gate_with_control_index_after_target_index():
     Desired output state : 1/sqrt(2) (|11> + |00>)
     """
     circ = circuit.Circuit(2)
-    circ.set_gate("H", 1).set_gate("X", 0, ctrl=1)
+    circ.set_gate("H", 1).set_gate("X", 0, ctrl=[1])
     circ.launch_circuit()
     system_matrix = circ.get_system_matrix()
     cmp = system_matrix == np.array([pytest.approx(1/np.sqrt(2)), 0, 0, pytest.approx(1/np.sqrt(2))])
@@ -134,7 +134,7 @@ def test_SWAP_gate_2_entangled():
     Desired output state : 1/sqrt(2) (|10> - |01>)
     """
     circ = circuit.Circuit(2)
-    circ.set_gate("X", 0).set_gate("H", 0).set_gate("X", 1, ctrl=0)
+    circ.set_gate("X", 0).set_gate("H", 0).set_gate("X", 1, ctrl=[0])
     
     circ.launch_circuit()
     
@@ -382,7 +382,7 @@ def test_Bell_state_plus():
     """
     circ = circuit.Circuit(2)
     circ.set_gate("H", 0)
-    circ.set_gate("X", 1, ctrl=0)
+    circ.set_gate("X", 1, ctrl=[0])
     circ.launch_circuit()
     
     system_matrix = circ.get_system_matrix()
@@ -396,7 +396,7 @@ def test_control_between_non_adjacent_qubits_1():
     Desired output state : |101>
     """
     circ = circuit.Circuit(3)
-    circ.set_gate("X", 2).set_gate("X", 0, ctrl=2)
+    circ.set_gate("X", 2).set_gate("X", 0, ctrl=[2])
     circ.launch_circuit()
     system_matrix = circ.get_system_matrix()
     
@@ -409,7 +409,7 @@ def test_control_between_non_adjacent_qubits_2():
     Desired output state : |101>
     """
     circ = circuit.Circuit(3)
-    circ.set_gate("X", 0).set_gate("X", 2, ctrl=0)
+    circ.set_gate("X", 0).set_gate("X", 2, ctrl=[0])
     circ.launch_circuit()
     system_matrix = circ.get_system_matrix()
     
@@ -422,7 +422,7 @@ def test_control_between_non_adjacent_qubits_3():
     Desired output state : |1001>
     """
     circ = circuit.Circuit(4)
-    circ.set_gate("X", 0).set_gate("X", 3, ctrl=0)
+    circ.set_gate("X", 0).set_gate("X", 3, ctrl=[0])
     circ.launch_circuit()
     system_matrix = circ.get_system_matrix()
     
@@ -435,7 +435,7 @@ def test_control_between_non_adjacent_qubits_4():
     Desired output state : |1010>
     """
     circ = circuit.Circuit(4)
-    circ.set_gate("X", 0).set_gate("X", 2, ctrl=0)
+    circ.set_gate("X", 0).set_gate("X", 2, ctrl=[0])
     circ.launch_circuit()
     system_matrix = circ.get_system_matrix()
     
@@ -448,7 +448,7 @@ def test_control_between_non_adjacent_qubits_5():
     Desired output state : |1001>
     """
     circ = circuit.Circuit(4)
-    circ.set_gate("X", 3).set_gate("X", 0, ctrl=3)
+    circ.set_gate("X", 3).set_gate("X", 0, ctrl=[3])
     circ.launch_circuit()
     system_matrix = circ.get_system_matrix()
     
@@ -461,7 +461,7 @@ def test_control_between_non_adjacent_qubits_5():
     Desired output state : |0101>
     """
     circ = circuit.Circuit(4)
-    circ.set_gate("X", 3).set_gate("X", 1, ctrl=3)
+    circ.set_gate("X", 3).set_gate("X", 1, ctrl=[3])
     circ.launch_circuit()
     system_matrix = circ.get_system_matrix()
     
@@ -474,7 +474,7 @@ def test_control_between_non_adjacent_qubits_6():
     Desired output state : |1010>
     """
     circ = circuit.Circuit(4)
-    circ.set_gate("X", 3).set_gate("X", 0, ctrl=3)
+    circ.set_gate("X", 3).set_gate("X", 0, ctrl=[3])
     circ.launch_circuit()
     system_matrix = circ.get_system_matrix()
     
@@ -487,10 +487,9 @@ def test_control_between_non_adjacent_qubits_7():
     Desired output state : |0101>
     """
     circ = circuit.Circuit(4)
-    circ.set_gate("X", 1).set_gate("X", 3, ctrl=1)
+    circ.set_gate("X", 1).set_gate("X", 3, ctrl=[1])
     circ.launch_circuit()
     system_matrix = circ.get_system_matrix()
     
     cmp = system_matrix == [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     assert cmp.all()
-    

@@ -74,7 +74,7 @@ class Circuit:
     def delete_qubit(self, index):
         self.quantum_register.pop(index)
 
-    def set_gate(self, gate_name, index, ctrl=None):
+    def set_gate(self, gate_name, index, ctrl=[]):
         """
         Add a gate to the circuit.
         Parameters
