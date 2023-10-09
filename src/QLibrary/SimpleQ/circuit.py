@@ -1,25 +1,11 @@
 import numpy as np
 
 from src.QLibrary.SimpleQ.column import Column
-from src.QLibrary.SimpleQ.tools import Gate, get_gate_by_name, prepare_initial_state, build_unitary, get_distribution
+from src.QLibrary.SimpleQ.tools import prepare_initial_state, build_unitary, get_distribution
 from src.QLibrary.SimpleQ.logger import *
 from src.QLibrary.SimpleQ.qubit import Qubit
 
 import json
-
-"""
-Circuit data representation:
-
-    "CIRCUIT": {
-        "QUBITS": int,
-        "GATES": {
-            "G1": ...,
-            "G2": ...,
-            ...
-        }
-    }
-"""
-
 
 class Circuit:
     """

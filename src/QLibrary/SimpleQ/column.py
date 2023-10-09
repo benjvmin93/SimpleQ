@@ -1,7 +1,6 @@
 import numpy as np
 
-from src.QLibrary.SimpleQ.tools import Gate
-from src.QLibrary.SimpleQ.tools import get_gate_by_name, get_control_matrix, build_unitary, get_swap_unitary
+from src.QLibrary.SimpleQ.tools import Gate, get_gate_by_name, get_control_matrix, build_unitary, get_swap_unitary
 from src.QLibrary.SimpleQ.logger import logger, LogLevels
 
 class Column:
@@ -16,19 +15,16 @@ class Column:
         the quantum gate we are applying at this specific index
     """
 
-    def __init__(self, index, gate_name, ctrl=[]):
+    def __init__(self, index : int, gate_name : str, ctrl : list=[]):
         """
         Parameters
         ----------
-        index : int
-            qubit index
-        gate_name : str
-            gate identifier
-        ctrl : int?
-            control qubit index
+        index : qubit index
+        gate_name : gate identifier
+        ctrl : control qubit index
         """
         self.qubit_index = index
-        self.gate = Gate(gate_name, ctrl)
+        self.gate : Gate = Gate(gate_name, ctrl)
 
     def column_to_json(self):
         column_json = {
@@ -43,7 +39,17 @@ class Column:
     def get_index(self):
         return self.qubit_index
     
-    def apply_column(self, system_matrix, len_register):
+    def apply_column(self, system_matrix : np.array, len_register : int):
+        """
+        Decomposes a column to its corresponding gate and applies it to the whole system.
+        
+        Parameters
+        ----------
+        system_matrix : np.array
+            system state matrix
+        len_register : int
+            quantum register's length
+        """
         gate = self.get_gate()
         index = self.get_index()
         controls = gate.get_ctrl()
