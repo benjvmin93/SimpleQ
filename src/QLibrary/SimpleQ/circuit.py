@@ -150,14 +150,19 @@ class Circuit:
         for qubit in self.quantum_register:
             qubit.print_state()
 
-    def print_circuit(self):
-        qubit_str = ["|0>" for _ in range(len(self.quantum_register))]
-        for column in self.circuit:
-            index = column.get_index()
-            gate = column.get_gate()
-            qubit_str[index] += f"--{gate.get_type()}"
-        for q in qubit_str:
-            print(q)
+    def pretty_print(self):
+        m = [["-----" for _ in range(len(self.circuit))] for _ in range(len(self.quantum_register))]
+        i = 0
+        for col in self.circuit:
+            m[col.get_index()][i] = f"[ {col.get_gate().get_gate_name()[0]} ]"
+            for ctrl in col.get_gate().get_ctrl():
+                m[ctrl][i] = f"- * -"
+            i += 1
+        for line in m:
+            print("|0> -", end="")
+            for col in line:
+                print(col, end="-")
+            print()
 
     @staticmethod
     def json_to_circuit(json_element):
