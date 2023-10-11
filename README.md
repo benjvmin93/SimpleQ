@@ -16,7 +16,9 @@
 
 ## features
 
-  //TODO!!!
+  - 1 qubit gates (H, X, Y, Z)
+  - Multicontrol gates (the users are able to build any 1 qubit gates with an arbitrary number of controls)
+  - Simulated measurement
 
 ## getting-started
 
