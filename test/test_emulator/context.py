@@ -4,3 +4,5 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 from src.QLibrary.SimpleQ import circuit
+from src.QLibrary.SimpleQ import tools
+from src.QLibrary.SimpleQ import logger

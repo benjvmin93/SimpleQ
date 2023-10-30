@@ -1,25 +1,11 @@
 import numpy as np
 
 from src.QLibrary.SimpleQ.column import Column
-from src.QLibrary.SimpleQ.tools import Gate, get_gate_by_name, prepare_initial_state, build_unitary, get_distribution
+from src.QLibrary.SimpleQ.tools import prepare_initial_state, build_unitary, get_distribution
 from src.QLibrary.SimpleQ.logger import *
 from src.QLibrary.SimpleQ.qubit import Qubit
 
 import json
-
-"""
-Circuit data representation:
-
-    "CIRCUIT": {
-        "QUBITS": int,
-        "GATES": {
-            "G1": ...,
-            "G2": ...,
-            ...
-        }
-    }
-"""
-
 
 class Circuit:
     """
@@ -68,6 +54,9 @@ class Circuit:
         else:
             self.quantum_register.insert(index, Qubit())
 
+    def get_classical_register(self):
+        return self.classical_register
+
     def delete_qubit(self, index):
         self.quantum_register.pop(index)
 
@@ -84,7 +73,7 @@ class Circuit:
             control qubit index
         """
         
-        implemented_gates = ["X", "Y", "Z", "H", "SWAP"]
+        implemented_gates = ["X", "Y", "Z", "H"]
         if gate_name not in implemented_gates:
             raise NameError(f"{gate_name} gate not found")
         self.circuit.append(Column(index, gate_name, ctrl))
