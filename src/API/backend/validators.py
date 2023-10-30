@@ -6,6 +6,7 @@ from src.API.backend.models import Circuit as CircuirModel
 from SimpleQ import circuit as circuit_object
 from fastapi_sqlalchemy import DBSessionMiddleware, db
 
+
 def circuit_validator(circuit: Circuit = Body(...)):
     c = None
     with db():
