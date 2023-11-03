@@ -4,7 +4,6 @@ from enum import Enum
 from datetime import datetime
 from contextlib import redirect_stdout
 from window_renderer import Window_Render
-import threading
 from multiprocessing import Process
 
 log_directory = "./bin/"
@@ -54,3 +53,6 @@ class Logger:
         # Destroy Logs upon Logger Object destruction, only if enabled
         if self.auto_destroy:
             shutil.rmtree(log_directory)
+
+
+logger = Logger()
