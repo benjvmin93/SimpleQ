@@ -15,16 +15,17 @@ class Column:
         the quantum gate we are applying at this specific index
     """
 
-    def __init__(self, index : int, gate_name : str, ctrl : list=[]):
+    def __init__(self, index : int, gate_name : str, ctrl : list=[], theta : float=None):
         """
         Parameters
         ----------
-        index : qubit index
-        gate_name : gate identifier
-        ctrl : control qubit index
+        - index: qubit index
+        - gate_name: gate identifier
+        - ctrl: control qubit index
+        - theta: rotation angle in case of rotation gate
         """
-        self.qubit_index = index
-        self.gate : Gate = Gate(gate_name, ctrl)
+        self.qubit_index : int = index
+        self.gate : Gate = Gate(gate_name, ctrl, theta)
 
     def column_to_json(self):
         column_json = {

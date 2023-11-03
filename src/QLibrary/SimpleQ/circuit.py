@@ -1,4 +1,5 @@
 import numpy as np
+from typing_extensions import Self
 
 from src.QLibrary.SimpleQ.column import Column
 from src.QLibrary.SimpleQ.tools import prepare_initial_state, build_unitary, get_distribution
@@ -60,23 +61,21 @@ class Circuit:
     def delete_qubit(self, index):
         self.quantum_register.pop(index)
 
-    def set_gate(self, gate_name, index, ctrl=[]):
+    def set_gate(self, gate_name : str, index : int, ctrl : list=[], theta : float=None) -> Self:
         """
         Add a gate to the circuit.
         Parameters
         ----------
-        gate_name : str
-            gate identifier
-        index : int
-            qubit index
-        ctrl : int?
-            control qubit index
+        - gate_name : gate identifier
+        - index : qubit index
+        - ctrl : control qubit index
+        - theta : rotation angle in case of rotation gate 
         """
         
-        implemented_gates = ["X", "Y", "Z", "H"]
+        implemented_gates = ["X", "Y", "Z", "H", "RX", "RY", "RZ"]
         if gate_name not in implemented_gates:
             raise NameError(f"{gate_name} gate not found")
-        self.circuit.append(Column(index, gate_name, ctrl))
+        self.circuit.append(Column(index, gate_name, ctrl, theta))
         logger.log(f"Circuit-set_gate : added {gate_name} gate at index {index}", LogLevels.INFO)
         return self
 

@@ -9,7 +9,7 @@ def prepare_initial_state(qubit_amount : int):
         matrix = np.kron(matrix, np.array([1, 0]))
     return matrix
 
-def get_gate_by_name(gate_name : str):
+def get_gate_by_name(gate_name : str, theta: float=None):
     """
     Returns the gate matrix associated to its name.
     """
@@ -21,6 +21,14 @@ def get_gate_by_name(gate_name : str):
         return np.array([[1, 0], [0, -1]])
     if gate_name == "H":
         return np.array([[1, 1], [1, -1]]) / np.sqrt(2)
+    if gate_name == "RX":
+        return np.array([[np.cos(theta / 2), -1j * np.sin(theta / 2)],
+                         [-1j * np.sin(theta / 2), np.cos(theta / 2)]])
+    if gate_name == "RY":
+        return np.array([[np.cos(theta / 2), -np.sin(theta / 2)],
+                         [np.sin(theta / 2), np.cos(theta / 2)]])
+    if gate_name == "RZ":
+        return np.diag([np.exp(-1j * theta / 2), np.exp(1j * theta / 2)])
     if gate_name == "M":
         return np.array([[1, 0], [0, 0]])
 
@@ -130,14 +138,22 @@ class Gate:
 
     Attributes
     ----------
-    gate_name : gate identifier
-    gate : gate array
-    ctrl : list of control qubit's indexes
+    - gate_name: gate identifier
+    - ctrl: list of control qubit's indexes
+    - theta: rotation angle in case of rotation gate
     """
-    def __init__(self, gate_name : str, ctrl : list):
+    def __init__(self, gate_name : str, ctrl : list, theta : float=None):
+        """
+        Parameters
+        ----------
+        - gate_name: gate identifier
+        - ctrl: control qubit indexes list
+        - theta: rotation angle in case of rotation gate
+        """
         self.gate_name = gate_name
         self.gate = get_gate_by_name(gate_name) 
         self.ctrl = ctrl
+        self.theta = theta
 
     def get_ctrl(self):
         return self.ctrl
