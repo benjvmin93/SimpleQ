@@ -1,7 +1,7 @@
 import numpy as np
 
 from src.QLibrary.SimpleQ.tools import Gate, get_gate_by_name, get_control_matrix, build_unitary, get_swap_unitary
-from src.QLibrary.SimpleQ.logger import logger, LogLevels
+from src.Logger.logger import logger, LogLevel
 
 class Column:
     """
@@ -55,12 +55,12 @@ class Column:
         controls = gate.get_ctrl()
 
         log_control = f"with control {controls}" if controls != [] else f"without control"
-        logger.log(f"Applying matrix {gate.get_name()} on qubit {index} {log_control}", LogLevels.INFO)
+        logger.log(f"Applying matrix {gate.get_name()} on qubit {index} {log_control}", LogLevel.INFO)
         
         gate_matrix = get_gate_by_name(gate.get_name())
         gate_matrix = build_unitary(gate_matrix, len_register, index, controls)
 
-        logger.log(f"Control gate: {gate_matrix}", LogLevels.DEBUG)
+        logger.log(f"Control gate: {gate_matrix}", LogLevel.DEBUG)
         whole_unitary = np.identity(2 ** len_register)        
 
         if controls == []:
@@ -72,14 +72,14 @@ class Column:
                 # Transpiler job
                 if control > index or control < index - len(controls):
                     while pos < index - len(controls):
-                        logger.log(f"SWAP between {pos} and {pos+1}", LogLevels.DEBUG)
+                        logger.log(f"SWAP between {pos} and {pos+1}", LogLevel.DEBUG)
                         swap_matrices.append(get_swap_unitary(len_register, pos, pos + 1))
                         pos += 1
                     while pos >= index + 1:
-                        logger.log(f"SWAP between {pos} and {pos-1}", LogLevels.DEBUG)
+                        logger.log(f"SWAP between {pos} and {pos-1}", LogLevel.DEBUG)
                         swap_matrices.append(get_swap_unitary(len_register, pos, pos - 1))
                         pos -= 1
-            logger.log(f"Building control matrix for {gate.get_name()} gate and {len(controls)} controls", LogLevels.DEBUG)
+            logger.log(f"Building control matrix for {gate.get_name()} gate and {len(controls)} controls", LogLevel.DEBUG)
             gate_matrix = get_control_matrix(gate, len(controls))
             gate_matrix = build_unitary(gate_matrix, len_register, index, controls)
             unitary = swap_matrices[0] if swap_matrices != [] else gate_matrix
@@ -91,7 +91,7 @@ class Column:
                     unitary = unitary @ swap_matrix
             whole_unitary = whole_unitary @ unitary
 
-        logger.log(f"Whole unitary: {whole_unitary} @ {system_matrix}", LogLevels.DEBUG)
+        logger.log(f"Whole unitary: {whole_unitary} @ {system_matrix}", LogLevel.DEBUG)
         system_matrix = whole_unitary @ system_matrix
         
         return system_matrix / np.linalg.norm(system_matrix)

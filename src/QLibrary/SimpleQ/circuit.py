@@ -2,7 +2,7 @@ import numpy as np
 
 from src.QLibrary.SimpleQ.column import Column
 from src.QLibrary.SimpleQ.tools import prepare_initial_state, build_unitary, get_distribution
-from src.QLibrary.SimpleQ.logger import *
+from src.Logger.logger import logger, LogLevel
 from src.QLibrary.SimpleQ.qubit import Qubit
 
 import json
@@ -26,8 +26,8 @@ class Circuit:
         self.system_matrix = prepare_initial_state(qubit_amount)
         self.circuit = []
         self.classical_register = [None for _ in range(qubit_amount)]
-        logger.log(f"Circuit - __init__: created new circuit with {str(len(self.quantum_register))} qubits.", LogLevels.INFO)
-        logger.log(f"Circuit - __init_: system matrix : {self.system_matrix}", LogLevels.DEBUG)
+        logger.log(f"Circuit - __init__: created new circuit with {str(len(self.quantum_register))} qubits.", LogLevel.INFO)
+        logger.log(f"Circuit - __init_: system matrix : {self.system_matrix}", LogLevel.DEBUG)
 
     def circuit_to_json(self):
         circ = []
@@ -77,7 +77,7 @@ class Circuit:
         if gate_name not in implemented_gates:
             raise NameError(f"{gate_name} gate not found")
         self.circuit.append(Column(index, gate_name, ctrl))
-        logger.log(f"Circuit-set_gate : added {gate_name} gate at index {index}", LogLevels.INFO)
+        logger.log(f"Circuit-set_gate : added {gate_name} gate at index {index}", LogLevel.INFO)
         return self
 
     def measure(self, index, shots=1000, simulation=False):
@@ -130,7 +130,7 @@ class Circuit:
     def launch_circuit(self):
         for column in self.circuit:
             self.system_matrix = column.apply_column(self.system_matrix, len(self.quantum_register))
-        logger.log(f"Circuit-launch_circuit : Final obtained vector state : {self.system_matrix}", LogLevels.INFO)
+        logger.log(f"Circuit-launch_circuit : Final obtained vector state : {self.system_matrix}", LogLevel.INFO)
 
     def print_results(self):
         for qubit in self.quantum_register:
